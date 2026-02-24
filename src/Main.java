@@ -1,26 +1,28 @@
-import java.util.LinkedList;
-import java.util.Scanner;
-
 public class Main {
+    public static boolean isPalindrome(String word) {
+        // Base Case: If length is 0 or 1, it's a palindrome
+        if (word.length() <= 1) {
+            return true;
+        }
+
+        // Check if first and last characters match
+        if (word.charAt(0) != word.charAt(word.length() - 1)) {
+            return false;
+        }
+
+        // Recursive Step: Check the middle substring
+        return isPalindrome(word.substring(1, word.length() - 1));
+    }
+
     public static void main(String[] args) {
-        Scanner scanner = new Scanner(System.in);
-        System.out.print("Enter word (LinkedList Version): ");
-        String word = scanner.nextLine().toLowerCase();
+        String input = "racecar";
+        System.out.println("--- Recursive Palindrome Checker ---");
+        System.out.println("Word: " + input);
 
-        LinkedList<Character> list = new LinkedList<>();
-        for (char c : word.toCharArray()) {
-            list.add(c);
+        if (isPalindrome(input.toLowerCase())) {
+            System.out.println("Result: Palindrome");
+        } else {
+            System.out.println("Result: Not Palindrome");
         }
-
-        boolean isPalindrome = true;
-        while (list.size() > 1) {
-            if (!list.removeFirst().equals(list.removeLast())) {
-                isPalindrome = false;
-                break;
-            }
-        }
-
-        System.out.println(isPalindrome ? "Palindrome" : "Not Palindrome");
-        scanner.close();
     }
 }
