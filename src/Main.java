@@ -1,45 +1,80 @@
-import java.util.LinkedList;
-import java.util.Queue;
-import java.util.Scanner;
 import java.util.Stack;
+import java.util.Scanner;
 
-public class UseCase6PalindromeCheckerApp {
-    public static void main(String[] args) {
-        Scanner scanner = new Scanner(System.in);
+// 1. STRATEGY INTERFACE
+interface PalindromeStrategy {
+    boolean isPalindrome(String text);
+}
 
-        System.out.println("--- UC6: Stack (LIFO) vs Queue (FIFO) Method ---");
-        System.out.print("Enter a string: ");
-        String input = scanner.nextLine().toLowerCase();
-
-        // Key Concept: Stack (Last In First Out)
+// 2. CONCRETE STRATEGY: STACK (LIFO)
+class StackStrategy implements PalindromeStrategy {
+    @Override
+    public boolean isPalindrome(String text) {
+        String clean = text.toLowerCase().replaceAll("\\s+", "");
         Stack<Character> stack = new Stack<>();
-        // Key Concept: Queue (First In First Out)
-        Queue<Character> queue = new LinkedList<>();
 
-        // Enqueue and Push operations
-        for (int i = 0; i < input.length(); i++) {
-            char c = input.charAt(i);
-            stack.push(c);   // Stack stores it
-            queue.add(c);    // Queue stores it
+        for (char c : clean.toCharArray()) {
+            stack.push(c);
         }
 
-        boolean isPalindrome = true;
-
-        // Logical Comparison: Compare FIFO output vs LIFO output
+        StringBuilder reversed = new StringBuilder();
         while (!stack.isEmpty()) {
-            // Pop gives the characters in REVERSE order
-            // Dequeue (poll) gives the characters in ORIGINAL order
-            if (!stack.pop().equals(queue.poll())) {
-                isPalindrome = false;
-                break;
+            reversed.append(stack.pop());
+        }
+        return clean.equals(reversed.toString());
+    }
+}
+
+// 3. CONCRETE STRATEGY: TWO-POINTER (Optimized)
+class TwoPointerStrategy implements PalindromeStrategy {
+    @Override
+    public boolean isPalindrome(String text) {
+        String clean = text.toLowerCase().replaceAll("\\s+", "");
+        int left = 0, right = clean.length() - 1;
+
+        while (left < right) {
+            if (clean.charAt(left++) != clean.charAt(right--)) {
+                return false;
             }
         }
+        return true;
+    }
+}
 
-        if (isPalindrome) {
-            System.out.println("Result: '" + input + "' is a Palindrome.");
-        } else {
-            System.out.println("Result: '" + input + "' is NOT a Palindrome.");
+// 4. CONTEXT CLASS (Main App)
+public class UseCase12PalindromeCheckerApp {
+    private PalindromeStrategy strategy;
+
+    // Method to change strategy at runtime (Polymorphism)
+    public void setStrategy(PalindromeStrategy strategy) {
+        this.strategy = strategy;
+    }
+
+    public boolean executeCheck(String text) {
+        if (strategy == null) {
+            System.out.println("No strategy set!");
+            return false;
         }
+        return strategy.isPalindrome(text);
+    }
+
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+        UseCase12PalindromeCheckerApp app = new UseCase12PalindromeCheckerApp();
+
+        System.out.println("=== UC12: STRATEGY PATTERN PALINDROME CHECKER ===");
+        System.out.print("Enter text: ");
+        String input = scanner.nextLine();
+
+        // RUNNING STRATEGY 1: STACK
+        app.setStrategy(new StackStrategy());
+        System.out.println("\n[Strategy: Stack (LIFO)]");
+        System.out.println("Result: " + (app.executeCheck(input) ? "Palindrome" : "Not Palindrome"));
+
+        // RUNNING STRATEGY 2: TWO-POINTER
+        app.setStrategy(new TwoPointerStrategy());
+        System.out.println("\n[Strategy: Two-Pointer (Optimized)]");
+        System.out.println("Result: " + (app.executeCheck(input) ? "Palindrome" : "Not Palindrome"));
 
         scanner.close();
     }
