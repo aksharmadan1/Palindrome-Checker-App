@@ -1,81 +1,51 @@
-import java.util.Stack;
-import java.util.Scanner;
+public class UseCase13PalindromeCheckerApp {
 
-// 1. STRATEGY INTERFACE
-interface PalindromeStrategy {
-    boolean isPalindrome(String text);
-}
-
-// 2. CONCRETE STRATEGY: STACK (LIFO)
-class StackStrategy implements PalindromeStrategy {
-    @Override
-    public boolean isPalindrome(String text) {
-        String clean = text.toLowerCase().replaceAll("\\s+", "");
-        Stack<Character> stack = new Stack<>();
-
-        for (char c : clean.toCharArray()) {
-            stack.push(c);
-        }
-
-        StringBuilder reversed = new StringBuilder();
-        while (!stack.isEmpty()) {
-            reversed.append(stack.pop());
-        }
-        return clean.equals(reversed.toString());
-    }
-}
-
-// 3. CONCRETE STRATEGY: TWO-POINTER (Optimized)
-class TwoPointerStrategy implements PalindromeStrategy {
-    @Override
-    public boolean isPalindrome(String text) {
-        String clean = text.toLowerCase().replaceAll("\\s+", "");
-        int left = 0, right = clean.length() - 1;
-
+    // Algorithm 1: Two-Pointer (Manual)
+    public static boolean checkTwoPointer(String text) {
+        int left = 0, right = text.length() - 1;
         while (left < right) {
-            if (clean.charAt(left++) != clean.charAt(right--)) {
-                return false;
-            }
+            if (text.charAt(left++) != text.charAt(right--)) return false;
         }
         return true;
     }
-}
 
-// 4. CONTEXT CLASS (Main App)
-public class UseCase12PalindromeCheckerApp {
-    private PalindromeStrategy strategy;
-
-    // Method to change strategy at runtime (Polymorphism)
-    public void setStrategy(PalindromeStrategy strategy) {
-        this.strategy = strategy;
-    }
-
-    public boolean executeCheck(String text) {
-        if (strategy == null) {
-            System.out.println("No strategy set!");
-            return false;
-        }
-        return strategy.isPalindrome(text);
+    // Algorithm 2: StringBuilder (Built-in)
+    public static boolean checkStringBuilder(String text) {
+        String reversed = new StringBuilder(text).reverse().toString();
+        return text.equals(reversed);
     }
 
     public static void main(String[] args) {
-        Scanner scanner = new Scanner(System.in);
-        UseCase12PalindromeCheckerApp app = new UseCase12PalindromeCheckerApp();
+        String testWord = "amanaplanacanalpanama"; // 21 chars
+        int iterations = 100000;
 
-        System.out.println("=== UC12: STRATEGY PATTERN PALINDROME CHECKER ===");
-        System.out.print("Enter text: ");
-        String input = scanner.nextLine();
+        System.out.println("--- UC13: Performance Comparison ---");
+        System.out.println("Testing with: " + testWord);
+        System.out.println("Iterations: " + iterations);
+        System.out.println("------------------------------------");
 
-        // RUNNING STRATEGY 1: STACK
-        app.setStrategy(new StackStrategy());
-        System.out.println("\n[Strategy: Stack (LIFO)]");
-        System.out.println("Result: " + (app.executeCheck(input) ? "Palindrome" : "Not Palindrome"));
+        // Measure Two-Pointer
+        long startTime = System.nanoTime();
+        for (int i = 0; i < iterations; i++) {
+            checkTwoPointer(testWord);
+        }
+        long durationTwoPointer = System.nanoTime() - startTime;
+        System.out.println("Two-Pointer Method:   " + durationTwoPointer + " ns");
 
-        // RUNNING STRATEGY 2: TWO-POINTER
-        app.setStrategy(new TwoPointerStrategy());
-        System.out.println("\n[Strategy: Two-Pointer (Optimized)]");
-        System.out.println("Result: " + (app.executeCheck(input) ? "Palindrome" : "Not Palindrome"));
+        // Measure StringBuilder
+        startTime = System.nanoTime();
+        for (int i = 0; i < iterations; i++) {
+            checkStringBuilder(testWord);
+        }
+        long durationStringBuilder = System.nanoTime() - startTime;
+        System.out.println("StringBuilder Method: " + durationStringBuilder + " ns");
 
-        scanner.close();
+        // Result Analysis
+        System.out.println("------------------------------------");
+        if (durationTwoPointer < durationStringBuilder) {
+            System.out.println("Winner: Two-Pointer Method is faster!");
+        } else {
+            System.out.println("Winner: StringBuilder Method is faster!");
+        }
     }
 }
